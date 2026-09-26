@@ -2,3 +2,16 @@
 1790255021433 : GET: /api/users
 1790255037246 : GET: /api/users/1003
 1790255121963: ::1 : POST: /api/users
+1790329594377: ::1 : POST: /api/users
+1790329896764: ::1 : POST: /api/users
+1790329930406: ::1 : POST: /api/users
+1790329945207: ::1 : POST: /api/users
+1790329952003: ::1 : POST: /api/users
+1790329954156: ::1 : POST: /api/users
+1790329976076: ::1 : POST: /api/users
+1790329996582: ::1 : POST: /api/users
+1790330278022: ::1 : GET: /api/users/10038
+1790330294730: ::1 : GET: /api/users/10038
+1790434315595: ::1 : GET: /api/users/10038
+1790434321936: ::1 : GET: /api/users/10
+1790434367743: ::1 : GET: /api/users/10
