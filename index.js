@@ -1,175 +1,37 @@
 const express = require("express");
-const fs = require("fs")
+const fs = require("fs");
 // const users = require("./MOCK_DATA.json");
 const { default: mongoose, Mongoose } = require("mongoose");
+const User = require("./models/user");
+
+const userRouter = require("./routes/user");
+const { connectMongoDB } = require("./connection");
+const { logReqRes } = require("./middlewares");
 
 const app = express();
 
 const PORT = 8000;
 
-//connection
-mongoose.connect("mongodb://127.0.0.1:27017/rest-api-1")
-    .then(()=> console.log("MongoDB connected"))
-    .catch((err)=> console.log("Mongo Error: ",err));
+connectMongoDB("mongodb://127.0.0.1:27017/rest-api-1")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("Mongo Error: ", err));
 
-// Schema
-const userSchema = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true,
-    },
-    lastName: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    jobTitle: {
-        type: String,
-    },
-    gender: {
-        type: String,
-    }, 
-},
-    {
-        timestamps: true,
-    }
-);
+app.use(express.urlencoded({ extended: false }));
 
-//Model
-const User = mongoose.model("user", userSchema);
-
-app.use(express.urlencoded({extended:false}))
-
-app.use((req,res,next)=> {
-    fs.appendFile('log.txt',`\n${Date.now()}: ${req.ip
-
-    } : ${req.method}: ${req.path}`, (err,data) => {
-        next();
-    })
-})
+app.use(logReqRes("/log.txt"));
 
 //Routes
 
-
-app.get('/users', async(req,res)=> {
-
-    const allDbUsers = await User.find({})
-    const html = `
+app.get("/users", async (req, res) => {
+  const allDbUsers = await User.find({});
+  const html = `
     <ul>    
-            ${allDbUsers.map((user)=>`<li>${user.firstName} - ${user.email}</li>` ).join("")}
+            ${allDbUsers.map((user) => `<li>${user.firstName} - ${user.email}</li>`).join("")}
     </ul>        
-    `
-    res.send(html)
-})
-
-// REST
-
-app
-    .route("/api/users/:id")
-    .get( async(req,res)=> {
-        // const id = Number(req.params.id);
-        // const user = users.find((user)=> user.id ===id);
-
-        const user = await User.findById(req.params.id);
-
-        if(!user) {
-            return res.status(404).json({status:"failed user not found",id: id})
-        }
-        return res.status(200).json({Status:"Success",user},);
-    })
-    .patch(async(req,res)=> {
-        // const id = Number(req.params.id);
-        const body = req.body;
-
-        // let user = users.find(user=> user.id===id);
-        
-        // if(!user) {
-        //     return res.status(404).json({status:"failed user not found",id: id})
-        // }
-        // // console.log("user:",user);
-        // // console.log("body:",body)
-        // Object.assign(user,{...user,...body})
-
-        // // console.log(users.find(user=> user.id ===id))
-
-        // fs.writeFile("./MOCK_DATA.json",JSON.stringify(users),(err,data)=> {
-        await User.findByIdAndUpdate(req.params.id,body)
-        return res.status(200).json({status: "Success",id:req.params.id});
-        // })
-    })
-    .delete(async(req,res)=> {
-        // const id = Number(req.params.id);
-        // let user = users.find(user=> user.id===id);
-        // if(!user) {
-        //     return res.status(404).json({status:"failed user not found",id: id})
-        // }
-
-        // let newUsers = users.filter(user=> user.id !== id); 
-
-        // fs.writeFile("./MOCK_DATA.json",JSON.stringify(newUsers),(err,data)=> {
-        //     return res.json({status: "success",id:id})
-        // })
-    const result = await User.findByIdAndDelete(req.params.id)
-    // console.log("delete result:",result);
-    if(!result) {
-        return res.status(404).json({msg:"user not found"})
-    }
-    return res.status(200).json({status: "Success"})
-
-    })
-app.get("/api/users",async (req, res) => {
-    const users = await User.find({})
-  return res.status(200).json(users);
+    `;
+  res.send(html);
 });
 
-app.post("/api/users",async(req,res)=> {
-
-    const body = req.body;
-    // console.log("body:",body)
-
-    if(!body || !body.first_name ||!body.last_name || !body.email || !body.gender || !body.job_title) {
-        return res.status(400).json({message: "All fields are required."})
-    }
-
-    // users.push({id:users.length + 1,...body});
-    // fs.writeFile("./MOCK_DATA.json",JSON.stringify(users),(err,data)=> {
-    //     return res.status(201).json({Status: "Success",id:users.length})
-    // })
-
-    const result = await User.create({
-        firstName: body.first_name,
-        lastName: body.last_name,
-        email: body.email,
-        jobTitle: body.job_title,
-        gender: body.gender,
-    })
-
-    console.log("result: ", result);
-    return res.status(201).json({msg: "Success"})
-})
-
-// app.get("/api/users/:id",(req,res)=> {
-
-//     const id = Number(req.params.id)
-//     const user = users.find(user=> user.id === id)
-
-//     return    res.json(user)
-// })
-
-// app.post("/api/users", (req,res)=> {
-//     return res.json("Status: Pending");
-// })
-
-// app.patch("/api/users/:id", (req,res)=> {
-//     return res.json("Status: Pending");
-// })
-
-// app.delete("/api/users/:id", (req,res)=> {
-//     return res.json("Status: Pending");
-// })
+app.use("/api/users", userRouter);
 
 app.listen(PORT, () => console.log(`Server Started at Port ${PORT}`));

@@ -38,3 +38,5 @@
 1790438852753: ::1 : GET: /api/users
 1790438871088: ::1 : DELETE: /api/users/6ab7edb8d6a18ce150de09dc
 1790438945147: ::1 : DELETE: /api/users/6ab7edb8d6a18ce150de09dc
+1790494229157: ::1 : GET: /api/users
+1790494300299: ::1 : GET: /api/users
